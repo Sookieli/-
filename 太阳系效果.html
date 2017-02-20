@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style type="text/css">
+    	* {
+    		margin: 0;
+    		padding: 0;
+    	}
+    	body {
+    		overflow: hidden;
+    	}
+    	.container {
+    		width: 800px;
+    		height: 600px;
+    		margin: 100px auto;
+    		border: 1px solid red;
+    	}
+    </style>
+</head>
+<body>
+    <div class="container">
+    	<canvas id="c"></canvas>
+    </div>
+    <script>
+        var cv = document.getElementById("c");
+        var ctx = cv.getContext("2d");
+
+        cv.width = 800;
+        cv.height = 600;
+
+
+		var ctx = cv.getContext("2d");
+		
+		// 弧度转化为角度
+		var toAngle = function(radian) {
+			return radian / Math.PI * 180;
+		}
+
+		// 角度转化为弧度
+		var toRadian = function(angle) {
+			return angle / 180 * Math.PI;
+		}
+
+		var x0 = cv.width / 2, y0 = cv.height / 2,	// 圆心点坐标
+			outerRaidus = 252,						// 外环的半径
+			innerRadius = 252 / 2,					// 内环的半径
+			bigStartAngle = -90,					// 外环上圆的起始角度
+			smallStartAngle = -90,					// 内环上圆的起始角度
+			bigRadius = 45,							// 外环上圆的半径
+			smallRadius = 35,						// 内环上圆的半径
+			step = 1;								// 转动速度
+
+		// 大圆的颜色值数据
+		var bigCircles = ["rebeccapurple", "rosybrown", "royalblue", "saddlebrown", "salmon"],
+		// 小圆的颜色值数据
+			smallCircles = ["red", "blue", "pink", "gray"];
+
+		var render = function() {
+			// 清空画布
+			ctx.clearRect(0, 0, cv.width, cv.height);
+			// 保存当前的绘制状态（状态一，即默认状态）
+			ctx.save();
+			// 开启新路径
+			ctx.beginPath();
+		
+			// 绘制外环
+			ctx.setLineDash([5]);
+			ctx.arc(x0, y0, outerRaidus, 0, Math.PI * 2);
+			ctx.stroke();
+			// 绘制内环
+			ctx.beginPath();
+			ctx.arc(x0, y0, innerRadius, 0, Math.PI * 2);
+			ctx.stroke();
+			// 重新载入 状态一
+			ctx.restore();
+
+			// 保存状态（状态二）
+			ctx.save();
+			// 绘制外环的圆
+			for(var i = 0; i < bigCircles.length; i++) {
+				ctx.beginPath();
+				// 计算圆弧上点的坐标
+				var tempX = x0 + outerRaidus * Math.cos( toRadian(bigStartAngle += 72) ),
+					tempY = y0 + outerRaidus * Math.sin( toRadian(bigStartAngle) );
+
+				ctx.arc(tempX, tempY, bigRadius, 0, Math.PI * 2);
+				ctx.fillStyle = bigCircles[i];
+				ctx.fill();
+			}
+			// 重新载入 状态二
+			ctx.restore();
+
+			ctx.save();
+			for(var i = 0; i < smallCircles.length; i++) {
+				ctx.beginPath();
+				// 计算圆弧上点的坐标
+				var tempX = x0 + innerRadius * Math.cos( toRadian(smallStartAngle += 90) ),
+					tempY = y0 + innerRadius * Math.sin( toRadian(smallStartAngle) );
+
+				ctx.arc(tempX, tempY, smallRadius, 0, Math.PI * 2);
+				ctx.fillStyle = smallCircles[i];
+				ctx.fill();
+			}
+			ctx.restore();
+
+			// 每次修改起始角度，实现转动效果
+			bigStartAngle += step;
+			smallStartAngle -= step;
+
+			// 执行动画
+			window.requestAnimationFrame(render);
+		};
+
+		render();
+
+		cv.addEventListener("mouseenter", function() {
+			step = 0.3;
+		});
+		cv.addEventListener("mouseleave", function() {
+			step = 1;
+		});
+	</script>
+</body>
+</html>
